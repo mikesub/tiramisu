@@ -23,27 +23,35 @@ dst = os.path.normpath(os.path.join(os.getcwd(), DST))
 linenumbers = []
 filename = ''
 
-def update_file(pathname, src, dst):
+if os.path.exists(DST): shutil.rmtree(DST)
+shutil.copytree(SRC,DST)
+
+def update_file(source):
     global filename
-    relative = os.path.relpath(pathname, src)
-    path = os.path.join(dst,relative)
-    shutil.copy(pathname, path)
-    print pathname,'->',path
+    relative = os.path.relpath(source, src)
+    destination = os.path.join(dst,relative)
+    shutil.copy(source, destination)
+    print source,'->',destination
     filename = relative
-    parse_file(path)
+    #~ parse_file(path)
+
+def remove_file(source):
+    relative = os.path.relpath(source, src)
+    destination = os.path.join(dst,relative)
+    os.remove(destination)
+    print 'removed',destination
+
 
 def parse_file(path):
     global linenumbers
     global filename
-    file = open(path,'r+')
-
     def detect_template(name, attrs):
         if name == 'xsl:template':
             linenumbers.append(p.CurrentLineNumber)
     
     p = expat.ParserCreate()
     p.StartElementHandler = detect_template
-    p.ParseFile(file)
+    p.ParseFile(open(path,'r'))
     
     print filename, linenumbers
     modify_file(path)
@@ -65,9 +73,11 @@ def modify_file(path):
     
 class ModifyHandler(pyinotify.ProcessEvent):
     def process_IN_MODIFY(self, event):
-        update_file(event.pathname, src, dst)
+        update_file(event.pathname)
+    def process_IN_DELETE(self, event):
+        remove_file(event.pathname)
 
 wm = pyinotify.WatchManager()
 notifier = pyinotify.Notifier(wm, ModifyHandler())
-wm.add_watch(src, pyinotify.IN_MODIFY, rec=True, auto_add=True, exclude_filter=pyinotify.ExcludeFilter(['.*\.svn']))
+wm.add_watch(src, pyinotify.IN_MODIFY | pyinotify.IN_DELETE, rec=True, auto_add=True, exclude_filter=pyinotify.ExcludeFilter(['.*\.svn']))
 notifier.loop()
