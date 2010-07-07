@@ -34,6 +34,7 @@ def update_file(pathname, src, dst):
 
 def parse_file(path):
     global linenumbers
+    global filename
     file = open(path,'r+')
 
     def detect_template(name, attrs):
@@ -44,7 +45,7 @@ def parse_file(path):
     p.StartElementHandler = detect_template
     p.ParseFile(file)
     
-    print linenumbers
+    print filename, linenumbers
     modify_file(path)
     linenumbers = []
     filename = ''
@@ -52,14 +53,14 @@ def parse_file(path):
 def modify_file(path):
     contents = minidom.parse(path)
     templates = contents.getElementsByTagName('xsl:template')
-    
     i = 0
+    
     print filename
     for template in templates:
         if template.childNodes:
-            print 'childnodes:',linenumbers[i]
+            print linenumbers[i],'(childnodes)'
         else:
-            print 'no childnodes:',linenumbers[i]
+            print linenumbers[i],'(empty)'
         i=+1
     
 class ModifyHandler(pyinotify.ProcessEvent):
