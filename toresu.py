@@ -9,9 +9,10 @@ TODO:
 4. разобраться с global
 '''
 
-import pyinotify, os, shutil
-from xml.parsers import expat
-from xml.dom import minidom
+import pyinotify, os, shutil, sys
+from lxml import etree
+
+NS = {'xsl':'http://www.w3.org/1999/XSL/Transform'}
 
 # here goes relative paths:
 SRC = 'test/src'
@@ -22,6 +23,7 @@ dst = os.path.normpath(os.path.join(os.getcwd(), DST))
 
 linenumbers = []
 filename = ''
+
 
 if os.path.exists(DST): shutil.rmtree(DST)
 shutil.copytree(SRC,DST)
@@ -38,37 +40,24 @@ def update_file(source, remove=False):
     
     shutil.copy(source, destination)
     print source,'->',destination
-    filename = relative
-    #~ parse_file(path)
+    filename = os.path.join(DST,relative)
+    parse_file(destination)
 
 def parse_file(path):
     global linenumbers
     global filename
-    def detect_template(name, attrs):
-        if name == 'xsl:template':
-            linenumbers.append(p.CurrentLineNumber)
     
-    p = expat.ParserCreate()
-    p.StartElementHandler = detect_template
-    p.ParseFile(open(path,'r'))
-    
-    print filename, linenumbers
-    modify_file(path)
-    linenumbers = []
-    filename = ''
-
-def modify_file(path):
-    contents = minidom.parse(path)
-    templates = contents.getElementsByTagName('xsl:template')
-    i = 0
-    
-    print filename
+    xml = etree.parse(path)
+    templates = xml.xpath('/xsl:stylesheet/xsl:template',namespaces=NS)
     for template in templates:
-        if template.childNodes:
-            print linenumbers[i],'(childnodes)'
-        else:
-            print linenumbers[i],'(empty)'
-        i=+1
+        x = etree.SubElement(template,'template',attrib={
+            'line':str(template.sourceline),
+            'file':str(filename)
+            })
+        print etree.tostring(template)
+    
+def modify_file(path):
+    pass
     
 class ModifyHandler(pyinotify.ProcessEvent):
     def process_IN_MODIFY(self, event):
