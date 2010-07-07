@@ -26,21 +26,20 @@ filename = ''
 if os.path.exists(DST): shutil.rmtree(DST)
 shutil.copytree(SRC,DST)
 
-def update_file(source):
+def update_file(source, remove=False):
     global filename
     relative = os.path.relpath(source, src)
     destination = os.path.join(dst,relative)
+    
+    if remove:
+        os.remove(destination)
+        print 'removed',destination
+        return
+    
     shutil.copy(source, destination)
     print source,'->',destination
     filename = relative
     #~ parse_file(path)
-
-def remove_file(source):
-    relative = os.path.relpath(source, src)
-    destination = os.path.join(dst,relative)
-    os.remove(destination)
-    print 'removed',destination
-
 
 def parse_file(path):
     global linenumbers
@@ -75,7 +74,7 @@ class ModifyHandler(pyinotify.ProcessEvent):
     def process_IN_MODIFY(self, event):
         update_file(event.pathname)
     def process_IN_DELETE(self, event):
-        remove_file(event.pathname)
+        update_file(event.pathname, True)
 
 wm = pyinotify.WatchManager()
 notifier = pyinotify.Notifier(wm, ModifyHandler())
