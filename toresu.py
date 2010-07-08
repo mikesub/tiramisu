@@ -1,14 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-TODO:
-1. решить с первичным копированием из src/dst
-2. проверить добавления нового / удаление старого.
-3. сделать modify_file рабочим.
-4. разобраться с global
-'''
-
 import pyinotify, os, shutil, sys
 from lxml import etree
 
@@ -21,9 +13,7 @@ DST = 'test/dst'
 src = os.path.normpath(os.path.join(os.getcwd(), SRC))
 dst = os.path.normpath(os.path.join(os.getcwd(), DST))
 
-linenumbers = []
 filename = ''
-
 
 if os.path.exists(DST): shutil.rmtree(DST)
 shutil.copytree(SRC,DST)
@@ -37,14 +27,11 @@ def update_file(source, remove=False):
         os.remove(destination)
         print 'removed',destination
         return
-    
-    shutil.copy(source, destination)
-    print source,'->',destination
+
     filename = os.path.join(DST,relative)
-    parse_file(destination)
+    parse_file(source)
 
 def parse_file(path):
-    global linenumbers
     global filename
     
     xml = etree.parse(path)
@@ -55,9 +42,9 @@ def parse_file(path):
             'file':str(filename)
             })
         print etree.tostring(template)
-    
-def modify_file(path):
-    pass
+        
+    print source,'->',destination    
+    filename = ''
     
 class ModifyHandler(pyinotify.ProcessEvent):
     def process_IN_MODIFY(self, event):
