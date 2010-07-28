@@ -16,8 +16,7 @@ dst = os.path.normpath(os.path.join(os.getcwd(), DST))
 filename = ''
 
 if os.path.exists(DST): shutil.rmtree(DST)
-shutil.copytree(SRC,DST)
-
+    
 def update_file(source, remove=False):
     global filename
     relative = os.path.relpath(source, src)
@@ -34,23 +33,30 @@ def update_file(source, remove=False):
 def parse_file(path):
     global filename
     
-    xml = etree.parse(path)
-    templates = xml.xpath('/xsl:stylesheet/xsl:template',namespaces=NS)
-    for template in templates:
-        x = etree.SubElement(template,'template',attrib={
-            'line':str(template.sourceline),
-            'file':str(filename)
-            })
-        print etree.tostring(template)
+    try:
+        xml = etree.parse(path)
+        templates = xml.xpath('/xsl:stylesheet/xsl:template',namespaces=NS)
+        for template in templates:
+            x = etree.SubElement(template,'template',attrib={
+                'line':str(template.sourceline),
+                'file':str(filename)
+                })
+            print etree.tostring(template)
+    except:
+        print path, 'failed to parse. just copied'
         
-    print source,'->',destination    
+    print source,'->',destination
     filename = ''
+
+for root, dirs, files in os.walk(SRC):
+    for file in files:
+        update_file('/'.join([root, file]))
     
 class ModifyHandler(pyinotify.ProcessEvent):
     def process_IN_MODIFY(self, event):
-        update_file(event.pathname)
+        update_file(event.pathname, remove=False)
     def process_IN_DELETE(self, event):
-        update_file(event.pathname, True)
+        update_file(event.pathname, remove=True)
 
 wm = pyinotify.WatchManager()
 notifier = pyinotify.Notifier(wm, ModifyHandler())
