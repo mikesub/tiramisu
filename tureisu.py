@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pyinotify, os, shutil, sys
-from lxml import etree
+import pyinotify, os, shutil, copy
+from lxml import etree 
 
 NS = {'xsl':'http://www.w3.org/1999/XSL/Transform'}
 
@@ -16,6 +16,7 @@ dst = os.path.normpath(os.path.join(os.getcwd(), DST))
 filename = ''
 
 if os.path.exists(DST): shutil.rmtree(DST)
+shutil.copytree(SRC,DST)
     
 def process_file(source, remove=False):
     global filename
@@ -28,24 +29,41 @@ def process_file(source, remove=False):
         return
 
     filename = os.path.join(DST,relative)
-    parse_file(source)
+    parse_file(source,destination)
 
-def parse_file(path):
+def parse_file(source,destination):
     global filename
     
     try:
-        xml = etree.parse(path)
+        xml = etree.parse(source)
         templates = xml.xpath('/xsl:stylesheet/xsl:template',namespaces=NS)
         for template in templates:
-            x = etree.SubElement(template,'template',attrib={
+            attrs={
                 'line':str(template.sourceline),
-                'file':str(filename)
-                })
-            print etree.tostring(template)
+                'file':str(filename),
+                'match':str(template.get('match'))
+            }
+            if template.get('mode'):
+                attrs['mode'] =  str(template.get('mode'))
+            if template.get('priority'):
+                attrs['priority'] = str(template.get('priority'))
+
+            el = etree.Element('template',attrib=attrs)
+
+            for child in template:
+                el.insert(0,child)
+            
+            if template.text:
+                el.text = template.text
+                template.text = ''
+                
+            template.insert(0,el)
+         
+        xml.write(destination,xml_declaration=True,encoding='utf-8')
     except:
-        print path, 'failed to parse. just copied'
+        print source, 'failed to parse. just copied.'
         
-    print source,'->',destination
+    print source,'->',filename
     filename = ''
 
 for root, dirs, files in os.walk(SRC):
