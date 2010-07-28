@@ -17,7 +17,7 @@ filename = ''
 
 if os.path.exists(DST): shutil.rmtree(DST)
     
-def update_file(source, remove=False):
+def process_file(source, remove=False):
     global filename
     relative = os.path.relpath(source, src)
     destination = os.path.join(dst,relative)
@@ -50,13 +50,13 @@ def parse_file(path):
 
 for root, dirs, files in os.walk(SRC):
     for file in files:
-        update_file('/'.join([root, file]))
+        process_file('/'.join([root, file]))
     
 class ModifyHandler(pyinotify.ProcessEvent):
     def process_IN_MODIFY(self, event):
-        update_file(event.pathname, remove=False)
+        process_file(event.pathname, remove=False)
     def process_IN_DELETE(self, event):
-        update_file(event.pathname, remove=True)
+        process_file(event.pathname, remove=True)
 
 wm = pyinotify.WatchManager()
 notifier = pyinotify.Notifier(wm, ModifyHandler())
