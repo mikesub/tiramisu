@@ -6,7 +6,7 @@ from lxml import etree
 
 NS = {
     'xsl':'http://www.w3.org/1999/XSL/Transform',
-    'xhtml':'xhtml':'http://www.w3.org/1999/xhtml'
+    'xhtml':'http://www.w3.org/1999/xhtml'
 }
 
 parser = optparse.OptionParser()
