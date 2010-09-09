@@ -1,21 +1,29 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pyinotify, os, shutil, copy
+import pyinotify, os, shutil, copy, sys, optparse
 from lxml import etree 
 
-NS = {'xsl':'http://www.w3.org/1999/XSL/Transform'}
+NS = {
+    'xsl':'http://www.w3.org/1999/XSL/Transform',
+    'xhtml':'xhtml':'http://www.w3.org/1999/xhtml'
+}
 
-# here goes relative paths:
-SRC = 'test/src'
-DST = 'test/dst'
+parser = optparse.OptionParser()
+parser.add_option('-d','--dir', dest='dir', help='path to XHH directory')
+(options, args) = parser.parse_args()
 
-src = os.path.normpath(os.path.join(os.getcwd(), SRC))
-dst = os.path.normpath(os.path.join(os.getcwd(), DST))
+if options.dir is None:
+    parser.print_help()
+    sys.exit()
+
+SRC = os.path.normpath(os.path.join(os.getcwd(), options.dir, 'xsl'))
+DST = os.path.normpath(os.path.join(SRC, '../tiramisu'))
 
 filename = ''
 
-if os.path.exists(DST): shutil.rmtree(DST)
+if os.path.exists(DST):
+    shutil.rmtree(DST)
 shutil.copytree(SRC,DST)
     
 def process_file(source, remove=False):
@@ -28,7 +36,7 @@ def process_file(source, remove=False):
         print 'removed',destination
         return
 
-    filename = os.path.join(DST,relative)
+    filename = os.path.normpath(os.path.join(DST,relative))
     parse_file(source,destination)
 
 def parse_file(source,destination):
@@ -36,14 +44,14 @@ def parse_file(source,destination):
     
     try:
         xml = etree.parse(source)
-        elements = xml.xpath('/xsl:stylesheet/xsl:template//node()[name()="div"]',namespaces=NS)
+        elements = xml.xpath('//div',namespaces=NS)
         for element in elements:
             element.set('line',str(element.sourceline))
-            element.set('file',str(filename))
+            element.set('file', str(str(filename).split('xsl/')[1]) )
         xml.write(destination,xml_declaration=True,encoding='utf-8')
         print source,'->',filename
     except:
-        pass
+        print source,' not parsed.'
     filename = ''
 
 for root, dirs, files in os.walk(SRC):
