@@ -36,39 +36,19 @@ def parse_file(source,destination):
     
     try:
         xml = etree.parse(source)
-        templates = xml.xpath('/xsl:stylesheet/xsl:template',namespaces=NS)
-        for template in templates:
-            attrs={
-                'line':str(template.sourceline),
-                'file':str(filename),
-                'match':str(template.get('match'))
-            }
-            if template.get('mode'):
-                attrs['mode'] =  str(template.get('mode'))
-            if template.get('priority'):
-                attrs['priority'] = str(template.get('priority'))
-
-            el = etree.Element('template',attrib=attrs)
-
-            for child in template:
-                el.insert(0,child)
-            
-            if template.text:
-                el.text = template.text
-                template.text = ''
-                
-            template.insert(0,el)
-         
+        elements = xml.xpath('/xsl:stylesheet/xsl:template//node()[name()="div"]',namespaces=NS)
+        for element in elements:
+            element.set('line',str(element.sourceline))
+            element.set('file',str(filename))
         xml.write(destination,xml_declaration=True,encoding='utf-8')
+        print source,'->',filename
     except:
-        print source, 'failed to parse. just copied.'
-        
-    print source,'->',filename
+        pass
     filename = ''
 
 for root, dirs, files in os.walk(SRC):
     for file in files:
-        process_file('/'.join([root, file]))
+       process_file('/'.join([root, file]))
     
 class ModifyHandler(pyinotify.ProcessEvent):
     def process_IN_MODIFY(self, event):
@@ -78,5 +58,11 @@ class ModifyHandler(pyinotify.ProcessEvent):
 
 wm = pyinotify.WatchManager()
 notifier = pyinotify.Notifier(wm, ModifyHandler())
-wm.add_watch(src, pyinotify.IN_MODIFY | pyinotify.IN_DELETE, rec=True, auto_add=True, exclude_filter=pyinotify.ExcludeFilter(['.*\.svn']))
+
+wm.add_watch(
+    src,
+    pyinotify.IN_MODIFY | pyinotify.IN_DELETE,
+    rec=True,
+    auto_add=True
+)
 notifier.loop()
