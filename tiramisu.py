@@ -68,7 +68,7 @@ wm = pyinotify.WatchManager()
 notifier = pyinotify.Notifier(wm, ModifyHandler())
 
 wm.add_watch(
-    src,
+    SRC,
     pyinotify.IN_MODIFY | pyinotify.IN_DELETE,
     rec=True,
     auto_add=True
