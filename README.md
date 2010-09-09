@@ -1,5 +1,9 @@
-ikususeru no tureisu
+tiramisu
 =====================
+
+requirements
+------------
+* lxml
 
 its turn
 --------
@@ -12,9 +16,8 @@ its turn
 your turn
 ---------
 * inspect your html output and see the picture.
-Each applied xsl:template is wrapped in 'template' tag with all of its attributes (match,name,mode,priority) and additional @filename and @linenumber.
+@file and @line is added to each 'div' element.
 
 TODO
 ---------
 * logging to file instead printing to output
-
