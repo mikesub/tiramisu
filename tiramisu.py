@@ -29,7 +29,7 @@ shutil.copytree(SRC,DST)
 def process_file(source, remove=False):
     global filename
     relative = os.path.relpath(source, SRC)
-    destination = os.path.join(dst,relative)
+    destination = os.path.join(DST,relative)
     
     if remove:
         os.remove(destination)
