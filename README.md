@@ -1,7 +1,7 @@
 tiramisu
 =====================
 
-requires lxml
+* requires [lxml][lxml]
 
 its turn
 --------
@@ -15,3 +15,8 @@ your turn
 ---------
 * inspect your output and see the picture.
 @file and @line is added to each html element.
+
+Dependencies
+============
+
+[lxml]: http://codespeak.net/lxml/
