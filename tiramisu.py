@@ -9,6 +9,10 @@ NS = {
     'xhtml':'http://www.w3.org/1999/xhtml'
 }
 
+HTML = ['a','abbr','acronym','address','area','b','base','bdo','big','blockquote','body','br','button','caption','cite','code','col','colgroup','dd','del','dfn','div','dl','dt','em','fieldset','form','h1','head','hr','html','i','img','input','ins','kbd','label','legend','li','link','map','meta','noscript','object','ol','optgroup','option','p','param','pre','q','samp','script','select','small','span','strong','style','sub','sup','table','tbody','td','textarea','tfoot','th','thead','title','tr','tt','ul','var']
+HTML_NS = ['//xhtml:'+i for i in HTML]
+XPATH = ' | '.join(HTML_NS)
+
 parser = optparse.OptionParser()
 parser.add_option('-d','--dir', dest='dir', help='path to XHH directory')
 (options, args) = parser.parse_args()
@@ -44,14 +48,13 @@ def parse_file(source,destination):
     
     try:
         xml = etree.parse(source)
-        elements = xml.xpath('//div',namespaces=NS)
+        elements = xml.xpath(XPATH,namespaces=NS)
         for element in elements:
             element.set('line',str(element.sourceline))
-            element.set('file', str(str(filename).split('xsl/')[1]) )
+            element.set('file', str(str(filename).split('tiramisu/')[-1]) )
         xml.write(destination,xml_declaration=True,encoding='utf-8')
         print source,'->',filename
-    except:
-        print source,' not parsed.'
+    except: pass
     filename = ''
 
 for root, dirs, files in os.walk(SRC):
