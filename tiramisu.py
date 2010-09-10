@@ -13,15 +13,14 @@ HTML = ['a','abbr','acronym','address','area','b','base','bdo','big','blockquote
 HTML_NS = ['//xhtml:'+i for i in HTML]
 XPATH = ' | '.join(HTML_NS)
 
-parser = optparse.OptionParser()
-parser.add_option('-d','--dir', dest='dir', help='path to XHH directory')
+parser = optparse.OptionParser(usage = 'usage: %prog PATH_TO_XHH')
 (options, args) = parser.parse_args()
 
-if options.dir is None:
+if not len(args):
     parser.print_help()
     sys.exit()
 
-SRC = os.path.normpath(os.path.join(os.getcwd(), options.dir, 'xsl'))
+SRC = os.path.normpath(os.path.join(os.getcwd(),args[0], 'xsl'))
 DST = os.path.normpath(os.path.join(SRC, '../tiramisu'))
 
 filename = ''
