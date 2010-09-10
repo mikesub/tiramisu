@@ -1,23 +1,17 @@
 tiramisu
 =====================
 
-requirements
-------------
-* lxml
+requires lxml
 
 its turn
 --------
 
 * take path.
-* clone it beside.
-* parse the clone adding some debug stuff to make the life easier.
+* parse xml files adding some debug stuff to make the life easier.
+* put them next door.
 * continuously watch for changes in original, updating clone.
 
 your turn
 ---------
-* inspect your html output and see the picture.
-@file and @line is added to each 'div' element.
-
-TODO
----------
-* logging to file instead printing to output
+* inspect your output and see the picture.
+@file and @line is added to each html element.
