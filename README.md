@@ -1,8 +1,6 @@
 tiramisu
 =====================
 
-* requires [lxml][lxml]
-
 its turn
 --------
 
@@ -18,5 +16,5 @@ your turn
 
 Dependencies
 ============
-
+* [lxml][lxml]
 [lxml]: http://codespeak.net/lxml/
